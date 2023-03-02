@@ -2,7 +2,7 @@ name: Fetch upstream
 
 on:
   schedule:
-    - cron: 0/5 * * * *
+    - cron: 0 0 * * *
 
 jobs:
   fetch-upstream:
