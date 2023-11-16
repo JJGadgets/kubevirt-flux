@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # get all branches
       - name: Git setup
         shell: bash
         run: |
@@ -21,8 +23,7 @@ jobs:
           export RELEASE=$(curl -s https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
           if [ "${RELEASE}" != "$(cat ./stable.txt)" ]; then
             curl -sLO https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt
-            git add ./stable.txt
-            git commit -m "feat: ${RELEASE}"
+            git commit -a -m "feat: ${RELEASE}"
             git push origin main
             git checkout -b ${RELEASE} main
           else
