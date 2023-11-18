@@ -22,13 +22,13 @@ jobs:
         run: |
           export RELEASE=$(curl -s https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
           git checkout -b ${RELEASE} main || git checkout ${RELEASE}
+          mkdir ./deploy
 
-          curl -vLO https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-operator.yaml
-          git add ./kubevirt-operator.yaml || true
-          git commit -m "feat: ${RELEASE} kubevirt-operator.yaml" || true
+          mv ./kustomization.tmpl.yaml ./deploy/kustomization.yaml
+          curl -vL -o ./deploy/1-kubevirt-operator.yaml https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-operator.yaml
+          curl -vL -o ./deploy/2-kubevirt-cr.yaml https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-cr.yaml
 
-          curl -vLO https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-cr.yaml
-          git add ./kubevirt-cr.yaml || true
-          git commit -m "feat: ${RELEASE} kubevirt-cr.yaml" || true
+          git add ./deploy || true
+          git commit -m "feat: ${RELEASE}" || true
 
           git push origin ${RELEASE} || true
