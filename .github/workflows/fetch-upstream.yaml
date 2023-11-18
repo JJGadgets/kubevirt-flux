@@ -9,9 +9,9 @@ jobs:
   fetch-upstream:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # get all branches
+          fetch-depth: 0
       - name: Git setup
         shell: bash
         run: |
@@ -22,18 +22,19 @@ jobs:
         run: |
           export RELEASE=$(curl -s https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
           if [ "${RELEASE}" != "$(cat ./stable.txt)" ]; then
-            curl -sLO https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt
-            git commit -a -m "feat: ${RELEASE}"
-            git push origin main
+            curl -vLO "https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt"
+            git add ./stable.txt || true
+            git commit -m "feat: ${RELEASE}" || true
+            git push origin main || true
             git checkout -b ${RELEASE} main
           else
             git checkout ${RELEASE}
           fi
-          
-          curl -sLO https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-operator.yaml
-          git add ./kubevirt-operator.yaml
-          git commit -m "feat: ${RELEASE} kubevirt-operator.yaml"
-          curl -sLO https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-cr.yaml
-          git add ./kubevirt-cr.yaml
-          git commit -m "feat: ${RELEASE} kubevirt-cr.yaml"
-          git push origin ${RELEASE}
+
+          curl -vLO https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-operator.yaml
+          git add ./kubevirt-operator.yaml || true
+          git commit -m "feat: ${RELEASE} kubevirt-operator.yaml" || true
+          curl -vLO https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-cr.yaml
+          git add ./kubevirt-cr.yaml || true
+          git commit -m "feat: ${RELEASE} kubevirt-cr.yaml" || true
+          git push origin ${RELEASE} || true
