@@ -21,20 +21,14 @@ jobs:
         shell: bash
         run: |
           export RELEASE=$(curl -s https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
-          if [ "${RELEASE}" != "$(cat ./stable.txt)" ]; then
-            curl -vLO "https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt"
-            git add ./stable.txt || true
-            git commit -m "feat: ${RELEASE}" || true
-            git push origin main || true
-            git checkout -b ${RELEASE} main
-          else
-            git checkout ${RELEASE}
-          fi
+          git checkout -b ${RELEASE} main || git checkout ${RELEASE}
 
           curl -vLO https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-operator.yaml
           git add ./kubevirt-operator.yaml || true
           git commit -m "feat: ${RELEASE} kubevirt-operator.yaml" || true
+
           curl -vLO https://github.com/kubevirt/kubevirt/releases/download/${RELEASE}/kubevirt-cr.yaml
           git add ./kubevirt-cr.yaml || true
           git commit -m "feat: ${RELEASE} kubevirt-cr.yaml" || true
+
           git push origin ${RELEASE} || true
