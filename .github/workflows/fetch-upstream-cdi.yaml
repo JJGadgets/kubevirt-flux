@@ -1,0 +1,35 @@
+name: Fetch upstream (CDI)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 0 * * *
+
+jobs:
+  fetch-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Git setup
+        shell: bash
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+      - name: Fetch files
+        shell: bash
+        run: |
+          export TAG=$(curl -s -w %{redirect_url} https://github.com/kubevirt/containerized-data-importer/releases/latest)
+          export VERSION=$(echo ${TAG##*/})
+          git checkout -b cdi-${VERSION} main || git checkout cdi-${VERSION}
+          mkdir ./deploy
+
+          mv ./kustomization-cdi.tmpl.yaml ./deploy/kustomization.yaml
+          curl -vL -o ./deploy/1-cdi-operator.yaml https://github.com/kubevirt/containerized-data-importer/releases/download/$VERSION/cdi-operator.yaml
+          curl -vL -o ./deploy/2-cdi-cr.yaml https://github.com/kubevirt/containerized-data-importer/releases/download/$VERSION/cdi-cr.yaml
+
+          git add ./deploy || true
+          git commit -m "feat: cdi-${VERSION}" || true
+
+          git push origin cdi-${VERSION} || true
